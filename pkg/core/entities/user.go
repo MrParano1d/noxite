@@ -1,0 +1,17 @@
+package entities
+
+import (
+	"time"
+
+	"github.com/mrparano1d/getregd/pkg/core/fields"
+)
+
+type User struct {
+	ID        fields.EntityID
+	Username  fields.Username
+	Email     fields.Email
+	Password  fields.Password
+	CreatedAt time.Time
+	UpdatedAt *time.Time
+	DeletedAt *time.Time
+}
