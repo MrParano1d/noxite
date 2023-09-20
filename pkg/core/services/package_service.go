@@ -1,9 +1,11 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"io"
 
+	"github.com/mrparano1d/getregd/pkg/core/coreerrors"
 	"github.com/mrparano1d/getregd/pkg/core/entities"
 	"github.com/mrparano1d/getregd/pkg/core/ports"
 )
@@ -13,7 +15,10 @@ type PackageService struct {
 	storageAdapter ports.StoragePort
 }
 
-func NewPackageService(packageAdapter ports.PackagePort, storageAdapter ports.StoragePort) *PackageService {
+func NewPackageService(
+	packageAdapter ports.PackagePort,
+	storageAdapter ports.StoragePort,
+) *PackageService {
 	return &PackageService{
 		packageAdapter: packageAdapter,
 		storageAdapter: storageAdapter,
@@ -22,7 +27,12 @@ func NewPackageService(packageAdapter ports.PackagePort, storageAdapter ports.St
 
 // usecases
 
-func (s *PackageService) ParseManifest(r io.Reader) (*entities.Manifest, error) {
+func (s *PackageService) ParseManifest(user *entities.User, r io.Reader) (*entities.Manifest, error) {
+
+	if user.Role.Permissions.GetPackage == false {
+		return nil, &coreerrors.NotAllowedToGetPackageError{}
+	}
+
 	manifest, err := s.packageAdapter.ParseManifest(r)
 	if err != nil {
 		return nil, handlePackageErrors(err)
@@ -30,8 +40,13 @@ func (s *PackageService) ParseManifest(r io.Reader) (*entities.Manifest, error) 
 	return manifest, nil
 }
 
-func (s *PackageService) PublishPackage(manifest *entities.Manifest) error {
-	if err := s.storageAdapter.PublishPackage(manifest); err != nil {
+func (s *PackageService) PublishPackage(ctx context.Context, user *entities.User, manifest *entities.Manifest) error {
+
+	if user.Role.Permissions.PublishPackage == false {
+		return &coreerrors.NotAllowedToPublishPackageError{}
+	}
+
+	if err := s.storageAdapter.PublishPackage(ctx, manifest); err != nil {
 		return handlePackageErrors(err)
 	}
 	return nil

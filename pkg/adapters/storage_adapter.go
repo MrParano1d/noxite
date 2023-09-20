@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -28,7 +29,7 @@ func NewFSStorageAdapter(storagePath string) *FSStorageAdapter {
 	}
 }
 
-func (a *FSStorageAdapter) PublishPackage(manifest *entities.Manifest) error {
+func (a *FSStorageAdapter) PublishPackage(ctx context.Context, manifest *entities.Manifest) error {
 
 	var version string
 	for v := range manifest.Versions {

@@ -1,11 +1,13 @@
 package ports
 
 import (
+	"context"
+
 	"github.com/mrparano1d/getregd/pkg/core/entities"
 )
 
 type StoragePort interface {
-	PublishPackage(manifest *entities.Manifest) error
+	PublishPackage(ctx context.Context, manifest *entities.Manifest) error
 }
 
 // errors

@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"context"
 	"time"
 
 	"github.com/mrparano1d/getregd/pkg/core/entities"
@@ -17,29 +18,33 @@ func NewAuthAdapter() *AuthAdapter {
 	return &AuthAdapter{}
 }
 
-func (a *AuthAdapter) Login(username fields.Username, password fields.Password) (*entities.User, error) {
+func (a *AuthAdapter) Login(ctx context.Context, username fields.Username, password fields.Password) (*entities.User, error) {
 	// TODO implement
 	return &entities.User{
-		ID:        fields.EntityID(123),
+		ID: fields.EntityID(123),
+		Role: &entities.Role{
+			ID:   fields.EntityID(1),
+			Name: "user",
+			Permissions: entities.Permissions{
+				GetPackage:       true,
+				PublishPackage:   false,
+				UpdatePackage:    false,
+				UnpublishPackage: false,
+
+				CreateUser: false,
+				GetUser:    false,
+				UpdateUser: false,
+				DeleteUser: false,
+
+				GetRole:    false,
+				CreateRole: false,
+				UpdateRole: false,
+				DeleteRole: false,
+			},
+		},
 		Username:  username,
 		Email:     fields.Email("test@test.de"),
 		Password:  password,
 		CreatedAt: time.Now(),
 	}, nil
-}
-
-func (a *AuthAdapter) Register(username fields.Username, email fields.Email, password fields.Password) (*entities.User, error) {
-	// TODO implement
-	return &entities.User{
-		ID:        fields.EntityID(123),
-		Username:  username,
-		Email:     email,
-		Password:  password,
-		CreatedAt: time.Now(),
-	}, nil
-}
-
-func (a *AuthAdapter) GenerateToken(user *entities.User) (fields.RequiredString, error) {
-	// TODO implement
-	return fields.RequiredString("token"), nil
 }

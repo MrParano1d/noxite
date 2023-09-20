@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/mrparano1d/getregd/pkg/app/auth"
 	"github.com/mrparano1d/getregd/pkg/app/handler"
 	"github.com/mrparano1d/getregd/pkg/core"
 
@@ -17,6 +18,7 @@ func ServeApp(app *core.ApplicationCore) error {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 
+	r.Use(auth.AuthMiddleware(app))
 	handler.AuthHandler(r, app)
 	handler.PackageHandler(r, app)
 

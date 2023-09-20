@@ -8,6 +8,7 @@ import (
 
 type User struct {
 	ID        fields.EntityID
+	Role      *Role
 	Username  fields.Username
 	Email     fields.Email
 	Password  fields.Password

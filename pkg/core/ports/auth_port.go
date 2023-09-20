@@ -1,6 +1,7 @@
 package ports
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/mrparano1d/getregd/pkg/core/entities"
@@ -8,9 +9,7 @@ import (
 )
 
 type AuthPort interface {
-	Login(username fields.Username, password fields.Password) (*entities.User, error)
-	Register(username fields.Username, email fields.Email, password fields.Password) (*entities.User, error)
-	GenerateToken(user *entities.User) (fields.RequiredString, error)
+	Login(ctx context.Context, username fields.Username, password fields.Password) (*entities.User, error)
 }
 
 // errors
@@ -22,25 +21,6 @@ type AuthAdapterLoginFailedError struct {
 
 func (e *AuthAdapterLoginFailedError) Error() string {
 	return fmt.Sprintf("login failed for user %s: %s", e.Username, e.Err)
-}
-
-type AuthAdapterRegistrationFailedError struct {
-	Username fields.Username
-	Email    fields.Email
-	Err      error
-}
-
-func (e *AuthAdapterRegistrationFailedError) Error() string {
-	return fmt.Sprintf("registration failed for user %s (%s): %s", e.Username, e.Email, e.Err)
-}
-
-type AuthAdapterUserAlreadyExistsError struct {
-	Username fields.Username
-	Email    fields.Email
-}
-
-func (e *AuthAdapterUserAlreadyExistsError) Error() string {
-	return fmt.Sprintf("user %s (%s) already exists", e.Username, e.Email)
 }
 
 type AuthAdapterUserNotFoundError struct {

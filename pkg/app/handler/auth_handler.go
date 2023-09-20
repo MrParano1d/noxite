@@ -30,7 +30,7 @@ func AuthHandler(r chi.Router, app *core.ApplicationCore) {
 			return
 		}
 
-		user, err := app.AuthService().Login(loginReq.Name, loginReq.Email, loginReq.Password)
+		session, err := app.AuthService().Login(r.Context(), loginReq.Name, loginReq.Email, loginReq.Password)
 		if err != nil {
 			// TODO replace log with proper logging
 			log.Println("login failed", err)
@@ -38,19 +38,12 @@ func AuthHandler(r chi.Router, app *core.ApplicationCore) {
 			return
 		}
 
-		token, err := app.AuthService().GenerateToken(user)
-		if err != nil {
-			// TODO replace log with proper logging
-			log.Println("token generation failed", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
 
 		w.WriteHeader(http.StatusCreated)
 
 		json.ConfigDefault.NewEncoder(w).Encode(loginRes{
 			OK:    "user " + loginReq.Name + " created",
-			Token: token.String(),
+			Token: session.Token.String(),
 		})
 
 		// TODO replace log with proper logging

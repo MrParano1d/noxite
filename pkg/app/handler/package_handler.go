@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mrparano1d/getregd/pkg/app/auth"
 	"github.com/mrparano1d/getregd/pkg/core"
 
 	json "github.com/bytedance/sonic"
@@ -23,7 +24,9 @@ func PackageHandler(r chi.Router, app *core.ApplicationCore) {
 
 	r.Put("/{packageName}", func(w http.ResponseWriter, r *http.Request) {
 
-		manifest, err := app.PackageService().ParseManifest(r.Body)
+		user := auth.GetUserFromContext(r.Context())
+
+		manifest, err := app.PackageService().ParseManifest(user, r.Body)
 		if err != nil {
 			// TODO replace log with proper logging
 			log.Println("manifest parse failed", err)
@@ -31,9 +34,9 @@ func PackageHandler(r chi.Router, app *core.ApplicationCore) {
 			return
 		}
 
-		if err := app.PackageService().PublishPackage(manifest); err != nil {
+		if err := app.PackageService().PublishPackage(r.Context(), user, manifest); err != nil {
 			// TODO replace log with proper logging
-			log.Println("package publish failed", err)
+			log.Println("package publish failed: ", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
