@@ -9,7 +9,6 @@ import (
 )
 
 func RoleFromEntRole(role *ent.Role) (*entities.Role, error) {
-
 	roleName, err := fields.RequiredStringFromString(role.Name)
 	if err != nil {
 		return nil, err
