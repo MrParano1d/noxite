@@ -9,6 +9,8 @@ type ApplicationCore struct {
 	authService    *services.AuthService
 	packageService *services.PackageService
 	sessionService *services.SessionService
+	userService    *services.UserService
+	roleService    *services.RoleService
 }
 
 func NewCoreApp(
@@ -16,6 +18,8 @@ func NewCoreApp(
 	authAdapter ports.AuthPort,
 	packageAdapter ports.PackagePort,
 	storageAdapter ports.StoragePort,
+	userAdapter ports.UserPort,
+	roleAdapter ports.RolePort,
 ) *ApplicationCore {
 
 	sessService := services.NewSessionService(sessionAdapter)
@@ -24,6 +28,8 @@ func NewCoreApp(
 		authService:    services.NewAuthService(authAdapter, sessService),
 		packageService: services.NewPackageService(packageAdapter, storageAdapter),
 		sessionService: sessService,
+		userService:    services.NewUserService(userAdapter),
+		roleService:    services.NewRoleService(roleAdapter),
 	}
 }
 
@@ -37,4 +43,12 @@ func (a *ApplicationCore) PackageService() *services.PackageService {
 
 func (a *ApplicationCore) SessionService() *services.SessionService {
 	return a.sessionService
+}
+
+func (a *ApplicationCore) UserService() *services.UserService {
+	return a.userService
+}
+
+func (a *ApplicationCore) RoleService() *services.RoleService {
+	return a.roleService
 }

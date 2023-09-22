@@ -1,3 +1,4 @@
 storage/
 package.json
 .yarnrc
+.env

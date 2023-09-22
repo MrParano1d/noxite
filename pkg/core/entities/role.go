@@ -9,6 +9,7 @@ import (
 type Role struct {
 	ID          fields.EntityID
 	Name        fields.RequiredString
+	Description string
 	Permissions Permissions
 	CreatedAt   time.Time
 	UpdatedAt   *time.Time

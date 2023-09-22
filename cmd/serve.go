@@ -4,12 +4,9 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/redis/go-redis/v9"
 	"github.com/spf13/cobra"
 
-	"github.com/mrparano1d/getregd/pkg/adapters"
 	"github.com/mrparano1d/getregd/pkg/app"
-	"github.com/mrparano1d/getregd/pkg/core"
 )
 
 // serveCmd represents the serve command
@@ -24,18 +21,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		redisClient := redis.NewClient(&redis.Options{
-			Addr: "localhost:6379",
-		})
-
-		authAdapter := adapters.NewAuthAdapter()
-		packageAdapter := adapters.NewPackageAdapter()
-		storeAdapter := adapters.NewFSStorageAdapter("./storage")
-		sessionAdapter := adapters.NewSessionAdapter(redisClient)
-
-		coreApp := core.NewCoreApp(sessionAdapter, authAdapter, packageAdapter, storeAdapter)
-
-		if err := app.ServeApp(coreApp); err != nil {
+		if err := app.ServeApp(); err != nil {
 			panic(err)
 		}
 	},

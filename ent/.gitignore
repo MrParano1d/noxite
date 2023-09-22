@@ -1,0 +1,7 @@
+*
+
+!.gitignore
+!generate.go
+!schema/
+!schema/**
+
