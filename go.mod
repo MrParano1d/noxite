@@ -1,4 +1,4 @@
-module github.com/mrparano1d/getregd
+module github.com/mrparano1d/noxite
 
 go 1.21.0
 

@@ -6,7 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/mrparano1d/getregd/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
 )
 
 // Role holds the schema definition for the Role entity.

@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/mrparano1d/getregd/pkg/core/fields"
+	"github.com/mrparano1d/noxite/pkg/core/fields"
 )
 
 type Session struct {

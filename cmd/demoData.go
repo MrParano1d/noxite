@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 
 	"github.com/joho/godotenv"
-	"github.com/mrparano1d/getregd/pkg/app"
-	"github.com/mrparano1d/getregd/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/app"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
 
 	"github.com/spf13/cobra"
 )

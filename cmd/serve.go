@@ -6,7 +6,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/mrparano1d/getregd/pkg/app"
+	"github.com/mrparano1d/noxite/pkg/app"
 )
 
 // serveCmd represents the serve command

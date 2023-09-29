@@ -19,6 +19,9 @@ func (User) Fields() []ent.Field {
 		field.Int("id").Unique(),
 		field.String("name").NotEmpty().Unique(),
 		field.String("email").NotEmpty().Unique(),
+		field.String("about_me").Optional().Nillable(),
+		field.String("website").Optional().Nillable(),
+		field.Bytes("avatar").Optional().Nillable(),
 		field.Bytes("password").NotEmpty(),
 		field.Int("role_id").Positive(),
 		field.Time("created_at").Default(time.Now).Immutable(),
@@ -31,5 +34,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("role", Role.Type).Ref("user_role").Unique().Required().Field("role_id"),
+		edge.To("packages", RepoPackage.Type),
+		edge.To("publishes", Version.Type),
 	}
 }

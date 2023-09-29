@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mrparano1d/getregd/pkg/core/coreerrors"
-	"github.com/mrparano1d/getregd/pkg/core/entities"
-	"github.com/mrparano1d/getregd/pkg/core/fields"
-	"github.com/mrparano1d/getregd/pkg/core/ports"
+	"github.com/mrparano1d/noxite/pkg/core/coreerrors"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/core/fields"
+	"github.com/mrparano1d/noxite/pkg/core/ports"
 )
 
 type UserService struct {

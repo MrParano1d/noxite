@@ -16,6 +16,14 @@ func RequiredStringFromString(s string) (RequiredString, error) {
 	return RequiredString(s), nil
 }
 
+func StringsFromRequiredStrings(s []RequiredString) []string {
+	strings := make([]string, len(s))
+	for i, v := range s {
+		strings[i] = string(v)
+	}
+	return strings
+}
+
 // errors
 
 // RequiredStringEmptyError is returned when the string is empty.

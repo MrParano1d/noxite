@@ -1,14 +1,15 @@
 package ports
 
 import (
+	"context"
 	"fmt"
 	"io"
 
-	"github.com/mrparano1d/getregd/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
 )
 
 type PackagePort interface {
-	ParseManifest(r io.Reader) (*entities.Manifest, error)
+	ParseManifest(ctx context.Context, r io.Reader) (*entities.PackageVersion, error)
 }
 
 // errors
@@ -18,5 +19,13 @@ type PackageAdapterManifestParseError struct {
 }
 
 func (e *PackageAdapterManifestParseError) Error() string {
-	return fmt.Sprintf("failed to parse manifest: %s", e.Err)
+	return fmt.Sprintf("package adapter failed to parse manifest: %s", e.Err)
+}
+
+type PackageAdapterManifestConvertError struct {
+	Err error
+}
+
+func (e *PackageAdapterManifestConvertError) Error() string {
+	return fmt.Sprintf("package adapter failed to convert manifest: %s", e.Err)
 }

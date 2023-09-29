@@ -6,11 +6,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/mrparano1d/getregd/ent"
-	"github.com/mrparano1d/getregd/ent/role"
-	"github.com/mrparano1d/getregd/pkg/core/entities"
-	"github.com/mrparano1d/getregd/pkg/core/fields"
-	"github.com/mrparano1d/getregd/pkg/core/ports"
+	"github.com/mrparano1d/noxite/ent"
+	"github.com/mrparano1d/noxite/ent/role"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/core/fields"
+	"github.com/mrparano1d/noxite/pkg/core/ports"
 )
 
 type RoleAdapter struct {

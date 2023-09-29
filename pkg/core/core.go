@@ -1,8 +1,8 @@
 package core
 
 import (
-	"github.com/mrparano1d/getregd/pkg/core/ports"
-	"github.com/mrparano1d/getregd/pkg/core/services"
+	"github.com/mrparano1d/noxite/pkg/core/ports"
+	"github.com/mrparano1d/noxite/pkg/core/services"
 )
 
 type ApplicationCore struct {

@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mrparano1d/getregd/pkg/core"
-	"github.com/mrparano1d/getregd/pkg/core/entities"
-	"github.com/mrparano1d/getregd/pkg/core/services"
+	"github.com/mrparano1d/noxite/pkg/core"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/core/services"
 )
 
 type AuthContextKey string

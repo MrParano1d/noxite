@@ -3,11 +3,11 @@ package adapters
 import (
 	"context"
 
-	"github.com/mrparano1d/getregd/ent"
-	"github.com/mrparano1d/getregd/ent/user"
-	"github.com/mrparano1d/getregd/pkg/core/entities"
-	"github.com/mrparano1d/getregd/pkg/core/fields"
-	"github.com/mrparano1d/getregd/pkg/core/ports"
+	"github.com/mrparano1d/noxite/ent"
+	"github.com/mrparano1d/noxite/ent/user"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/core/fields"
+	"github.com/mrparano1d/noxite/pkg/core/ports"
 )
 
 type AuthAdapter struct {

@@ -6,7 +6,7 @@ import (
 
 	json "github.com/bytedance/sonic"
 	"github.com/go-chi/chi/v5"
-	"github.com/mrparano1d/getregd/pkg/core"
+	"github.com/mrparano1d/noxite/pkg/core"
 )
 
 type loginReq struct {
@@ -37,7 +37,6 @@ func AuthHandler(r chi.Router, app *core.ApplicationCore) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
 
 		w.WriteHeader(http.StatusCreated)
 

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mrparano1d/getregd/pkg/core/entities"
-	"github.com/mrparano1d/getregd/pkg/core/fields"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/core/fields"
 )
 
 // CreateUserInput contains the fields required to create a new user.
@@ -48,6 +48,9 @@ type UserPort interface {
 	// Returns UserAdapterDeleteUserFailedError if failed to delete user.
 	// Returns UserAdapterUserNotFoundError if user with the given ID does not exist.
 	DeleteUser(ctx context.Context, userID fields.EntityID) error
+	// FindUsersByEmailAddress returns all users with the given email address.
+	// Returns UserAdapterGetAllUsersFailedError if failed to get all users.
+	FindUsersByEmailAddress(ctx context.Context, emails []fields.Email) ([]*entities.User, error)
 }
 
 // errors

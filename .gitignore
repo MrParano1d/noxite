@@ -1,4 +1,7 @@
 storage/
+node_modules/
 package.json
 .yarnrc
+.npmrc
+yarn-error.log
 .env

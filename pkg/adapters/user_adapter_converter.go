@@ -1,9 +1,9 @@
 package adapters
 
 import (
-	"github.com/mrparano1d/getregd/ent"
-	"github.com/mrparano1d/getregd/pkg/core/entities"
-	"github.com/mrparano1d/getregd/pkg/core/fields"
+	"github.com/mrparano1d/noxite/ent"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/core/fields"
 )
 
 func UserFromEntUser(user *ent.User) (*entities.User, error) {

@@ -7,11 +7,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/mrparano1d/getregd/ent"
-	"github.com/mrparano1d/getregd/pkg/adapters"
-	"github.com/mrparano1d/getregd/pkg/app/auth"
-	"github.com/mrparano1d/getregd/pkg/app/handler"
-	"github.com/mrparano1d/getregd/pkg/core"
+	"github.com/mrparano1d/noxite/ent"
+	"github.com/mrparano1d/noxite/pkg/adapters"
+	"github.com/mrparano1d/noxite/pkg/app/auth"
+	"github.com/mrparano1d/noxite/pkg/app/handler"
+	"github.com/mrparano1d/noxite/pkg/core"
 	"github.com/redis/go-redis/v9"
 
 	"log"
@@ -56,11 +56,11 @@ func ServeApp() error {
 	})
 
 	authAdapter := adapters.NewAuthAdapter(entClient)
-	packageAdapter := adapters.NewPackageAdapter()
-	storeAdapter := adapters.NewFSStorageAdapter("./storage")
+	userAdapter := adapters.NewUserAdapter(entClient)
+	packageAdapter := adapters.NewPackageAdapter(userAdapter)
+	storeAdapter := adapters.NewStorageEntAdapter(entClient)
 	sessionAdapter := adapters.NewSessionAdapter(redisClient)
 	roleAdapter := adapters.NewRoleAdapter(entClient)
-	userAdapter := adapters.NewUserAdapter(entClient)
 
 	app := core.NewCoreApp(sessionAdapter, authAdapter, packageAdapter, storeAdapter, userAdapter, roleAdapter)
 	r := chi.NewRouter()

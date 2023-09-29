@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mrparano1d/getregd/ent"
-	"github.com/mrparano1d/getregd/ent/user"
-	"github.com/mrparano1d/getregd/pkg/core/entities"
-	"github.com/mrparano1d/getregd/pkg/core/fields"
-	"github.com/mrparano1d/getregd/pkg/core/ports"
+	"github.com/mrparano1d/noxite/ent"
+	"github.com/mrparano1d/noxite/ent/user"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/core/fields"
+	"github.com/mrparano1d/noxite/pkg/core/ports"
 )
 
 type UserAdapter struct {
@@ -128,4 +128,30 @@ func (u *UserAdapter) DeleteUser(ctx context.Context, userID fields.EntityID) er
 	}
 
 	return nil
+}
+
+func (u *UserAdapter) FindUsersByEmailAddress(ctx context.Context, emails []fields.Email) ([]*entities.User, error) {
+	emailStrings := make([]string, 0, len(emails))
+	for _, email := range emails {
+		emailStrings = append(emailStrings, email.String())
+	}
+	users, err := u.entClient.User.Query().WithRole().Where(user.EmailIn(emailStrings...)).All(ctx)
+	if err != nil {
+		return nil, &ports.UserAdapterGetAllUsersFailedError{
+			Err: err,
+		}
+	}
+
+	result := make([]*entities.User, 0, len(users))
+	for _, user := range users {
+		user, err := UserFromEntUser(user)
+		if err != nil {
+			return nil, &ports.UserAdapterGetAllUsersFailedError{
+				Err: err,
+			}
+		}
+		result = append(result, user)
+	}
+
+	return result, nil
 }
