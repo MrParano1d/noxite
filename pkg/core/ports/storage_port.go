@@ -10,7 +10,7 @@ import (
 
 type StoragePort interface {
 	PublishPackage(ctx context.Context, creatorID fields.EntityID, manifest *entities.PackageVersion) error
-	GetPackage(ctx context.Context, name fields.PackageName, version fields.RequiredString) ([]byte, error)
+	GetPackage(ctx context.Context, name fields.PackageName, version fields.RequiredString) (*entities.PackageVersion, error)
 }
 
 // errors

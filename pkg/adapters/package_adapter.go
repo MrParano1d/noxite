@@ -3,6 +3,7 @@ package adapters
 import (
 	"context"
 	"io"
+	"log"
 
 	json "github.com/bytedance/sonic"
 
@@ -69,30 +70,42 @@ func (a *PackageAdapter) ParseManifest(ctx context.Context, r io.Reader) (*entit
 
 	// check if author exists
 	if m.Versions[manifest.Version.String()].Author != nil {
-		email, err := fields.EmailFromString(m.Versions[manifest.Version.String()].Author.Email)
-		if err != nil {
-			return nil, &ports.PackageAdapterManifestConvertError{Err: err}
-		}
-		knownAuthor, err := a.usersAdapter.FindUsersByEmailAddress(ctx, []fields.Email{email})
-		if err != nil {
-			return nil, &ports.PackageAdapterManifestConvertError{Err: err}
-		}
-		if len(knownAuthor) > 0 {
-			mixedAuthor := fields.AuthorFromEntityID(knownAuthor[0].ID).ToMixedAuthor()
-			manifest.Author = &mixedAuthor
-		} else {
-			manifestAuthor, err := fields.ForeignAuthorBuilder().
-				Name(m.Versions[manifest.Version.String()].Author.Name).
-				Email(m.Versions[manifest.Version.String()].Author.Email).
-				Website(m.Versions[manifest.Version.String()].Author.URL).
-				Build()
+		switch author := m.Versions[manifest.Version.String()].Author.(type) {
+		case string:
+			// TODO add debug log
+			log.Println("author is string:", author)
+		case map[string]any:
+			email, err := fields.EmailFromString(author["email"].(string))
 			if err != nil {
 				return nil, &ports.PackageAdapterManifestConvertError{Err: err}
 			}
-			mixedAuthor := manifestAuthor.ToMixedAuthor()
-			manifest.Author = &mixedAuthor
+			knownAuthor, err := a.usersAdapter.FindUsersByEmailAddress(ctx, []fields.Email{email})
+			if err != nil {
+				return nil, &ports.PackageAdapterManifestConvertError{Err: err}
+			}
+			if len(knownAuthor) > 0 {
+				mixedAuthor := fields.AuthorFromEntityID(knownAuthor[0].ID).ToMixedAuthor()
+				manifest.Author = &mixedAuthor
+			} else {
+				manifestAuthor, err := fields.ForeignAuthorBuilder().
+					Name(author["name"].(string)).
+					Email(author["email"].(string)).
+					Website(author["url"].(string)).
+					Build()
+				if err != nil {
+					return nil, &ports.PackageAdapterManifestConvertError{Err: err}
+				}
+				mixedAuthor := manifestAuthor.ToMixedAuthor()
+				manifest.Author = &mixedAuthor
+			}
 		}
+
 	}
 
 	return manifest, nil
+}
+
+func (a *PackageAdapter) SerializeManifest(ctx context.Context, ver *entities.PackageVersion) ([]byte, error) {
+	m := manifestFromPackageVersion(ver.Name, ver)
+	return json.Marshal(m)
 }

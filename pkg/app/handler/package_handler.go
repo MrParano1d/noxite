@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mrparano1d/noxite/pkg/app/auth"
@@ -19,13 +21,22 @@ type publishRes struct {
 }
 
 func PackageHandler(r chi.Router, app *core.ApplicationCore) {
-	r.Get("/{packageName}", func(w http.ResponseWriter, r *http.Request) {
+
+	r.Get("/{packageName}/-/{tarball}", func(w http.ResponseWriter, r *http.Request) {
+		tarball := chi.URLParam(r, "tarball")
+
+		lastIdx := strings.LastIndex(tarball, "-")
+		if lastIdx == -1 {
+			http.Error(w, "invalid package name", http.StatusBadRequest)
+			return
+		}
+
+		packageName := tarball[:lastIdx]
+		version := tarball[lastIdx+1 : len(tarball)-4]
 
 		user := auth.GetUserFromContext(r.Context())
 
-		packageName := chi.URLParam(r, "packageName")
-
-		pkg, err := app.PackageService().GetPackage(r.Context(), user, packageName, "latest")
+		pkg, err := app.PackageService().GetPackage(r.Context(), user, packageName, version)
 		if err != nil {
 			if _, ok := err.(*services.PackageServicePackageNotFoundError); ok {
 				http.Error(w, err.Error(), http.StatusNotFound)
@@ -40,6 +51,57 @@ func PackageHandler(r chi.Router, app *core.ApplicationCore) {
 			// TODO replace log with proper logging
 			log.Println("package get failed: ", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		var data []byte
+		_, err = base64.StdEncoding.Decode([]byte(pkg.Data), data)
+		if err != nil {
+			// TODO replace log with proper logging
+			log.Println("package data decode failed: ", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", pkg.ContentType.String())
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
+
+		w.Write(data)
+
+		fmt.Println("package: ", packageName, version)
+		fmt.Println("package data: ", string(pkg.Data))
+	})
+
+	r.Get("/{packageName}", func(w http.ResponseWriter, r *http.Request) {
+
+		user := auth.GetUserFromContext(r.Context())
+
+		packageName := chi.URLParam(r, "packageName")
+
+		ver, err := app.PackageService().GetPackage(r.Context(), user, packageName, "latest")
+		if err != nil {
+			if _, ok := err.(*services.PackageServicePackageNotFoundError); ok {
+				http.Error(w, err.Error(), http.StatusNotFound)
+				return
+			} else if _, ok := err.(*services.PackageServiceGetPackageError); ok {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			} else if _, ok := err.(*coreerrors.NotAllowedToGetPackageError); ok {
+				http.Error(w, err.Error(), http.StatusForbidden)
+				return
+			}
+			// TODO replace log with proper logging
+			log.Println("package get failed: ", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		pkg, err := app.PackageService().SerializeManifest(r.Context(), user, ver)
+		if err != nil {
+			// TODO replace log with proper logging
+			log.Println("manifest serialize failed: ", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 

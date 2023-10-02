@@ -10,6 +10,7 @@ import (
 
 type PackagePort interface {
 	ParseManifest(ctx context.Context, r io.Reader) (*entities.PackageVersion, error)
+	SerializeManifest(ctx context.Context, manifest *entities.PackageVersion) ([]byte, error)
 }
 
 // errors

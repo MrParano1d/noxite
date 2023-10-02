@@ -53,7 +53,7 @@ func (s *PackageService) PublishPackage(ctx context.Context, user *entities.User
 	return nil
 }
 
-func (s *PackageService) GetPackage(ctx context.Context, user *entities.User, name string, version string) ([]byte, error) {
+func (s *PackageService) GetPackage(ctx context.Context, user *entities.User, name string, version string) (*entities.PackageVersion, error) {
 	if user.Role.Permissions.GetPackage == false {
 		return nil, &coreerrors.NotAllowedToGetPackageError{}
 	}
@@ -75,6 +75,19 @@ func (s *PackageService) GetPackage(ctx context.Context, user *entities.User, na
 	}
 
 	data, err := s.storageAdapter.GetPackage(ctx, packageName, packageVersion)
+	if err != nil {
+		return nil, handlePackageErrors(err)
+	}
+
+	return data, nil
+}
+
+func (s *PackageService) SerializeManifest(ctx context.Context, user *entities.User, manifest *entities.PackageVersion) ([]byte, error) {
+	if user.Role.Permissions.GetPackage == false {
+		return nil, &coreerrors.NotAllowedToGetPackageError{}
+	}
+
+	data, err := s.packageAdapter.SerializeManifest(ctx, manifest)
 	if err != nil {
 		return nil, handlePackageErrors(err)
 	}

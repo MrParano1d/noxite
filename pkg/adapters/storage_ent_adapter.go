@@ -10,8 +10,6 @@ import (
 	"github.com/mrparano1d/noxite/pkg/core/entities"
 	"github.com/mrparano1d/noxite/pkg/core/fields"
 	"github.com/mrparano1d/noxite/pkg/core/ports"
-
-	json "github.com/bytedance/sonic"
 )
 
 type StorageEntAdapter struct {
@@ -55,13 +53,22 @@ func (s *StorageEntAdapter) createVersion(ctx context.Context, publisherID field
 		SetVersion(manifest.Version.String()).
 		SetNillableDescription(manifest.Description).
 		SetKeywords(fields.StringsFromRequiredStrings(manifest.Keywords)).
-		SetHomepage(manifest.Homepage.String()).
-		SetBugs(manifest.Bugs).
 		SetNillableLicense(manifest.License).
-		SetAuthor(manifest.Author).
 		SetContributors(manifest.Contributors).
 		SetFunding(manifest.Funding).
 		SetFiles(fields.StringsFromRequiredStrings(manifest.Files))
+
+	if manifest.Homepage != nil {
+		query = query.SetHomepage(manifest.Homepage.String())
+	}
+
+	if manifest.Bugs != nil {
+		query = query.SetBugs(manifest.Bugs)
+	}
+
+	if manifest.Author != nil {
+		query = query.SetAuthor(manifest.Author)
+	}
 
 	if manifest.Main != nil {
 		query = query.SetMain(manifest.Main.String())
@@ -156,8 +163,7 @@ func (s *StorageEntAdapter) PublishPackage(ctx context.Context, creatorID fields
 	return nil
 }
 
-func (s *StorageEntAdapter) GetPackage(ctx context.Context, name fields.PackageName, rev fields.RequiredString) ([]byte, error) {
-	var m manifest
+func (s *StorageEntAdapter) GetPackage(ctx context.Context, name fields.PackageName, rev fields.RequiredString) (*entities.PackageVersion, error) {
 
 	pkg, err := s.entClient.RepoPackage.Query().WithVersions(func(vq *ent.VersionQuery) {
 		vq.Order(ent.Desc(version.FieldVersion))
@@ -177,23 +183,18 @@ func (s *StorageEntAdapter) GetPackage(ctx context.Context, name fields.PackageN
 	}
 
 	if rev.String() == "latest" {
-		m = manifestFromEntVersion(pkg.Name, pkg.Edges.Versions[0])
+		return packageVersionFromEntVersion(name.String(), pkg.Edges.Versions[0])
 	} else {
 		for _, v := range pkg.Edges.Versions {
 			if v.Version == rev.String() {
-				m = manifestFromEntVersion(pkg.Name, v)
-				break
+				return packageVersionFromEntVersion(name.String(), v)
 			}
 		}
 	}
 
-	if m.Name == "" {
-		return nil, &ports.StorageAdapterPackageNotFoundError{
-			Name:    name,
-			Version: rev,
-		}
+	return nil, &ports.StorageAdapterPackageNotFoundError{
+		Name:    name,
+		Version: rev,
 	}
 
-
-	return json.Marshal(m)
 }

@@ -1,9 +1,11 @@
 package adapters
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/mrparano1d/noxite/ent"
+	"github.com/mrparano1d/noxite/pkg/core/entities"
 	"github.com/mrparano1d/noxite/pkg/core/fields"
 )
 
@@ -125,6 +127,88 @@ func fundingFromMixedFunding(funding []fields.UrlType) any {
 	return f
 }
 
+func manifestFromPackageVersion(packageName fields.RequiredString, ver *entities.PackageVersion) manifest {
+
+	var description string
+	if ver.Description != nil {
+		description = *ver.Description
+	}
+	var license string
+	if ver.License != nil {
+		license = *ver.License
+	}
+	var main string
+	if ver.Main != nil {
+		main = ver.Main.String()
+	}
+	var browser string
+	if ver.Browser != nil {
+		browser = ver.Browser.String()
+	}
+	var readme string
+	if ver.Readme != nil {
+		readme = *ver.Readme
+	}
+
+	versions := make(map[string]revision)
+	versions[ver.Version.String()] = revision{
+		Name:                 packageName.String(),
+		Version:              ver.Version.String(),
+		Description:          description,
+		Keywords:             fields.StringsFromRequiredStrings(ver.Keywords),
+		Homepage:             ver.Homepage.String(),
+		Bugs:                 bugsFromFieldBugs(ver.Bugs),
+		License:              license,
+		Author:               authorFromMixedAuthor(ver.Author),
+		Contributors:         contributorsFromMixedAuthors(ver.Contributors),
+		Funding:              fundingFromMixedFunding(ver.Funding),
+		Files:                fields.StringsFromRequiredStrings(ver.Files),
+		Main:                 main,
+		Browser:              browser,
+		Bin:                  stringMapFromRequiredStringMap(ver.Bin),
+		Man:                  fields.StringsFromRequiredStrings(ver.Man),
+		Directories:          directoriesFromFieldDirectories(ver.Directories),
+		Repository:           repositoryFromFrieldRepository(ver.Repository),
+		Scripts:              stringMapFromRequiredStringMap(ver.Scripts),
+		Config:               stringMapFromRequiredStringMap(ver.Config),
+		Dependencies:         stringMapFromRequiredStringMap(ver.Dependencies),
+		DevDependencies:      stringMapFromRequiredStringMap(ver.DevDependencies),
+		PeerDependencies:     stringMapFromRequiredStringMap(ver.PeerDependencies),
+		PeerDependenciesMeta: peerDependenciesMetaFromFieldPeerDependenciesMeta(ver.PeerDependenciesMeta),
+		BundledDependencies:  fields.StringsFromRequiredStrings(ver.BundledDependencies),
+		OptionalDependencies: stringMapFromRequiredStringMap(ver.OptionalDependencies),
+		Engines:              stringMapFromRequiredStringMap(ver.Engines),
+		OS:                   fields.StringsFromRequiredStrings(ver.OS),
+		CPU:                  fields.StringsFromRequiredStrings(ver.CPU),
+		Private:              ver.Private,
+		PublishConfig:        mapAnyFromMapRequiredStringAny(ver.PublishConfig),
+		Workspaces:           fields.StringsFromRequiredStrings(ver.Workspaces),
+		Dist: dist{
+			Tarball:   "http://localhost:3000/" + url.QueryEscape(packageName.String()) + "/-/" + url.QueryEscape(packageName.String()) + "-" + ver.Version.String() + ".tgz",
+			Integrity: ver.Integrity.String(),
+			SHASUM:    ver.SHASUM.String(),
+		},
+	}
+
+	attachments := make(map[string]attachment)
+	attachments[ver.Version.String()] = attachment{
+		ContentType: ver.ContentType.String(),
+		Data:        ver.Data.String(),
+		Length:      ver.Length,
+	}
+	m := manifest{
+		Name:        packageName.String(),
+		Description: description,
+		Readme:      readme,
+		Versions:    versions,
+		Attachments: attachments,
+		DistTags:    map[string]string{},
+	}
+
+	return m
+
+}
+
 func manifestFromEntVersion(packageName string, ver *ent.Version) manifest {
 	versions := make(map[string]revision)
 	versions[ver.Version] = revision{
@@ -183,4 +267,175 @@ func manifestFromEntVersion(packageName string, ver *ent.Version) manifest {
 	}
 
 	return m
+}
+
+func packageVersionFromEntVersion(packageName string, ver *ent.Version) (*entities.PackageVersion, error) {
+
+	name, err := fields.RequiredStringFromString(packageName)
+	if err != nil {
+		return nil, &InvalidPackageVersionFieldErrror{Field: "name", Rearson: err.Error()}
+	}
+
+	version, err := fields.RequiredStringFromString(ver.Version)
+	if err != nil {
+		return nil, &InvalidPackageVersionFieldErrror{Field: "version", Rearson: err.Error()}
+	}
+
+	var description *string
+	if ver.Description != "" {
+		description = &ver.Description
+	}
+
+	keywords := make([]fields.RequiredString, len(ver.Keywords))
+	for i, v := range ver.Keywords {
+		keywords[i], err = fields.RequiredStringFromString(v)
+		if err != nil {
+			return nil, &InvalidPackageVersionFieldErrror{Field: "keywords", Rearson: err.Error()}
+		}
+	}
+
+	var license *string
+	if ver.License != "" {
+		license = &ver.License
+	}
+
+	var main fields.RequiredString
+	if ver.Main != "" {
+		main, err = fields.RequiredStringFromString(ver.Main)
+		if err != nil {
+			return nil, &InvalidPackageVersionFieldErrror{Field: "main", Rearson: err.Error()}
+		}
+	}
+
+	var browser fields.RequiredString
+	if ver.Browser != "" {
+		browser, err = fields.RequiredStringFromString(ver.Browser)
+		if err != nil {
+			return nil, &InvalidPackageVersionFieldErrror{Field: "browser", Rearson: err.Error()}
+		}
+	}
+
+	var readme *string
+	if ver.Readme != "" {
+		readme = &ver.Readme
+	}
+
+	var homepage fields.Website
+	if ver.Homepage != "" {
+		homepage, err = fields.WebsiteFromString(ver.Homepage)
+		if err != nil {
+			return nil, &InvalidPackageVersionFieldErrror{Field: "homepage", Rearson: err.Error()}
+		}
+	}
+
+	files := make([]fields.RequiredString, len(ver.Files))
+	for i, v := range ver.Files {
+		files[i], err = fields.RequiredStringFromString(v)
+		if err != nil {
+			return nil, &InvalidPackageVersionFieldErrror{Field: "files", Rearson: err.Error()}
+		}
+	}
+
+	bundledDependencies := make([]fields.RequiredString, len(ver.BundledDependencies))
+	for i, v := range ver.BundledDependencies {
+		bundledDependencies[i], err = fields.RequiredStringFromString(v)
+		if err != nil {
+			return nil, &InvalidPackageVersionFieldErrror{Field: "bundledDependencies", Rearson: err.Error()}
+		}
+	}
+
+	os := make([]fields.RequiredString, len(ver.Os))
+	for i, v := range ver.Os {
+		os[i], err = fields.RequiredStringFromString(v)
+		if err != nil {
+			return nil, &InvalidPackageVersionFieldErrror{Field: "os", Rearson: err.Error()}
+		}
+	}
+
+	cpu := make([]fields.RequiredString, len(ver.CPU))
+	for i, v := range ver.CPU {
+		cpu[i], err = fields.RequiredStringFromString(v)
+		if err != nil {
+			return nil, &InvalidPackageVersionFieldErrror{Field: "cpu", Rearson: err.Error()}
+		}
+	}
+
+	worspaces := make([]fields.RequiredString, len(ver.Workspaces))
+	for i, v := range ver.Workspaces {
+		worspaces[i], err = fields.RequiredStringFromString(v)
+		if err != nil {
+			return nil, &InvalidPackageVersionFieldErrror{Field: "workspaces", Rearson: err.Error()}
+		}
+	}
+
+	integrity, err := fields.RequiredStringFromString(ver.Integrity)
+	if err != nil {
+		return nil, &InvalidPackageVersionFieldErrror{Field: "integrity", Rearson: err.Error()}
+	}
+
+	shasum, err := fields.RequiredStringFromString(ver.Shasum)
+	if err != nil {
+		return nil, &InvalidPackageVersionFieldErrror{Field: "shasum", Rearson: err.Error()}
+	}
+
+	contentType, err := fields.RequiredStringFromString(ver.ContentType)
+	if err != nil {
+		return nil, &InvalidPackageVersionFieldErrror{Field: "contentType", Rearson: err.Error()}
+	}
+
+	data, err := fields.RequiredStringFromString(ver.Data)
+	if err != nil {
+		return nil, &InvalidPackageVersionFieldErrror{Field: "data", Rearson: err.Error()}
+	}
+
+	return &entities.PackageVersion{
+		Name:                 name,
+		Version:              version,
+		Description:          description,
+		Keywords:             keywords,
+		Homepage:             &homepage,
+		Bugs:                 ver.Bugs,
+		License:              license,
+		Author:               ver.Author,
+		Contributors:         ver.Contributors,
+		Funding:              ver.Funding,
+		Files:                files,
+		Main:                 &main,
+		Browser:              &browser,
+		Bin:                  ver.Bin,
+		Man:                  ver.Man,
+		Directories:          ver.Directories,
+		Repository:           ver.Repository,
+		Scripts:              ver.Scripts,
+		Config:               ver.Config,
+		Dependencies:         ver.Dependencies,
+		DevDependencies:      ver.DevDependencies,
+		PeerDependencies:     ver.PeerDependencies,
+		PeerDependenciesMeta: ver.PeerDependenciesMeta,
+		BundledDependencies:  bundledDependencies,
+		OptionalDependencies: ver.OptionalDependencies,
+		Engines:              ver.Engines,
+		OS:                   os,
+		CPU:                  cpu,
+		Private:              &ver.Private,
+		PublishConfig:        ver.PublishConfig,
+		Workspaces:           worspaces,
+
+		Integrity:   integrity,
+		SHASUM:      shasum,
+		ContentType: contentType,
+		Data:        data,
+		Length:      ver.Length,
+		Readme:      readme,
+	}, nil
+
+}
+
+type InvalidPackageVersionFieldErrror struct {
+	Field   string
+	Rearson string
+}
+
+func (e *InvalidPackageVersionFieldErrror) Error() string {
+	return fmt.Sprintf("invalid package version field %s: %s", e.Field, e.Rearson)
 }

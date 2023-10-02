@@ -56,7 +56,7 @@ type revision struct {
 	Homepage             string                    `json:"homepage,omitempty"`
 	Bugs                 *bugs                     `json:"bugs,omitempty"`
 	License              string                    `json:"license,omitempty"`
-	Author               *author                   `json:"author,omitempty"`
+	Author               any                       `json:"author,omitempty"`
 	Contributors         []contributor             `json:"contributors,omitempty"`
 	Funding              any                       `json:"funding"`
 	Files                []string                  `json:"files"`
@@ -199,7 +199,7 @@ func ManifestFromPackageJSON(m manifest) (*entities.PackageVersion, []fields.Ema
 	}
 
 	var bugs *fields.Bugs
-	if m.Versions[ver].Bugs.URL != "" || m.Versions[ver].Bugs.Email != "" {
+	if m.Versions[ver].Bugs != nil && (m.Versions[ver].Bugs.URL != "" || m.Versions[ver].Bugs.Email != "") {
 		bugsBuilder := fields.BugsBuilder()
 		if m.Versions[ver].Bugs.URL != "" {
 			bugsBuilder.URL(m.Versions[ver].Bugs.URL)
@@ -407,7 +407,7 @@ func ManifestFromPackageJSON(m manifest) (*entities.PackageVersion, []fields.Ema
 	}
 
 	var repository *fields.Repository
-	if m.Versions[ver].Repository.URL != "" {
+	if m.Versions[ver].Repository != nil && m.Versions[ver].Repository.URL != "" {
 		repositoryBuilder := fields.RepositoryBuilder()
 		if m.Versions[ver].Repository.Type != nil {
 			repositoryBuilder.Type(*m.Versions[ver].Repository.Type)
