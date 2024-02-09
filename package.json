@@ -1,6 +1,6 @@
 {
   "name": "@noxite/package-example",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A test package",
   "keywords": [
     "test"
@@ -53,9 +53,6 @@
   },
   "config": {
     "port": "8080"
-  },
-  "dependencies": {
-    "@noxite/testpkg": "^1.0.0"
   },
   "peerDependenciesMeta": {},
   "bundledDependencies": [],
