@@ -29,6 +29,7 @@ func (a *PackageAdapter) ParseManifest(ctx context.Context, r io.Reader) (*entit
 	if err := json.ConfigDefault.NewDecoder(r).Decode(&m); err != nil {
 		return nil, &ports.PackageAdapterManifestParseError{Err: err}
 	}
+
 	manifest, contributorsToCheck, err := ManifestFromPackageJSON(m)
 	if err != nil {
 		return nil, &ports.PackageAdapterManifestConvertError{Err: err}

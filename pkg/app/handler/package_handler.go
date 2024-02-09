@@ -54,8 +54,7 @@ func PackageHandler(r chi.Router, app *core.ApplicationCore) {
 			return
 		}
 
-		var data []byte
-		_, err = base64.StdEncoding.Decode([]byte(pkg.Data), data)
+		data, err := base64.StdEncoding.DecodeString(pkg.Data.String())
 		if err != nil {
 			// TODO replace log with proper logging
 			log.Println("package data decode failed: ", err)
@@ -68,9 +67,6 @@ func PackageHandler(r chi.Router, app *core.ApplicationCore) {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
 
 		w.Write(data)
-
-		fmt.Println("package: ", packageName, version)
-		fmt.Println("package data: ", string(pkg.Data))
 	})
 
 	r.Get("/{packageName}", func(w http.ResponseWriter, r *http.Request) {
@@ -107,8 +103,6 @@ func PackageHandler(r chi.Router, app *core.ApplicationCore) {
 
 		w.WriteHeader(http.StatusOK)
 		w.Write(pkg)
-
-		fmt.Println("manifest: ", string(pkg))
 	})
 
 	r.Put("/{packageName}", func(w http.ResponseWriter, r *http.Request) {
