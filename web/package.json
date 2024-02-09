@@ -1,0 +1,24 @@
+{
+  "name": "noxite-webapp",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "yarn nx run-many -t dev",
+    "watch": "nx watch --all -- nx run \\$NX_PROJECT_NAME:build",
+    "build": "make build-prod-core && make build-prod-web-adapters && make build-prod-app",
+    "test": "yarn nx run-many -t test",
+    "prepare": "cd .. && husky install web/.husky"
+  },
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.53.0",
+    "husky": "^8.0.3",
+    "nx": "15.9.2",
+    "prettier": "3.0.3"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}

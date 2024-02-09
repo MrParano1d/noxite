@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Lint the frontend packages
+cd web
+yarn eslint packages
+yarn prettier . --check
