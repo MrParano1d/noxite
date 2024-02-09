@@ -45,7 +45,6 @@ func (b *Bugs) UnmarshalJSON(data []byte) error {
 		b.Email = &email
 		return nil
 	case map[string]any:
-		fmt.Printf("%T: %v\n", v, v)
 		if len(v) == 0 {
 			*b = Bugs{}
 			return nil
