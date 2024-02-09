@@ -3,13 +3,24 @@ package schema
 import (
 	"time"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
 type RepoPackage struct {
 	ent.Schema
+}
+
+// Annotations of the RepoPackage.
+func (RepoPackage) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entgql.QueryField(),
+		entgql.RelayConnection(),
+		entgql.MultiOrder(),
+	}
 }
 
 func (p RepoPackage) Fields() []ent.Field {
@@ -25,7 +36,7 @@ func (p RepoPackage) Fields() []ent.Field {
 
 func (p RepoPackage) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("versions", Version.Type),
+		edge.To("versions", Version.Type).Annotations(entgql.MultiOrder(), entgql.RelayConnection()),
 		edge.From("creator", User.Type).Ref("packages").Unique().Required().Field("creator_id"),
 	}
 }

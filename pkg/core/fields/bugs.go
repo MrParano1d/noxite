@@ -1,6 +1,7 @@
 package fields
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -8,6 +9,72 @@ import (
 type Bugs struct {
 	URL   *Website
 	Email *Email
+}
+
+func (b Bugs) MarshalJSON() ([]byte, error) {
+	if b.URL != nil {
+		return json.Marshal(b.URL)
+	}
+
+	if b.Email != nil {
+		return json.Marshal(b.Email)
+	}
+
+	return []byte("null"), nil
+}
+
+func (b *Bugs) UnmarshalJSON(data []byte) error {
+	var v any
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	switch v := v.(type) {
+	case string:
+		email, err := EmailFromString(v)
+		if err != nil {
+			website, err := WebsiteFromString(v)
+			if err != nil {
+				return &InvalidBugsError{
+					Reason: err.Error(),
+				}
+			}
+			b.URL = &website
+			return nil
+		}
+		b.Email = &email
+		return nil
+	case map[string]any:
+		fmt.Printf("%T: %v\n", v, v)
+		if len(v) == 0 {
+			*b = Bugs{}
+			return nil
+		}
+
+		builder := BugsBuilder()
+
+		url, ok := v["url"].(string)
+		if ok {
+			builder.URL(url)
+		}
+
+		email, ok := v["email"].(string)
+		if ok {
+			builder.Email(email)
+		}
+
+		bugs, err := builder.Build()
+		if err != nil {
+			return err
+		}
+
+		*b = bugs
+		return nil
+	default:
+		return &InvalidBugsError{
+			Reason: fmt.Sprintf("%T is not a valid type for Bugs", v),
+		}
+	}
 }
 
 func (b Bugs) String() string {

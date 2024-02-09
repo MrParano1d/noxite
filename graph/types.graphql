@@ -1,0 +1,16 @@
+scalar Bytes
+scalar Map
+
+scalar Permissions
+scalar RequiredMap
+scalar RequiredKeyMap
+scalar RequiredMapRequiredKeyMap
+scalar RequiredList
+
+scalar Bugs
+scalar MixedAuthor
+scalar MixedAuthors
+scalar UrlType
+scalar RequiredString
+scalar Directories
+scalar Repository

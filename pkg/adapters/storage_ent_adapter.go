@@ -3,6 +3,8 @@ package adapters
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/mrparano1d/noxite/ent"
 	"github.com/mrparano1d/noxite/ent/repopackage"
@@ -32,8 +34,33 @@ func (s *StorageEntAdapter) reactivatePackage(ctx context.Context, creatorID fie
 	return s.entClient.RepoPackage.Update().SetCreatorID(creatorID.Int()).SetNillableDeletedAt(nil).Where(repopackage.IDEQ(pkg.ID)).Exec(ctx)
 }
 
+func isVersionNewer(latest, newVersion string) (bool, error) {
+	latestParts := strings.Split(latest, ".")
+	newParts := strings.Split(newVersion, ".")
+
+	isNewer := true
+	for i := 0; i < len(latestParts); i++ {
+		latestPart, err := strconv.Atoi(latestParts[i])
+		if err != nil {
+			return false, err
+		}
+
+		newPart, err := strconv.Atoi(newParts[i])
+		if err != nil {
+			return false, err
+		}
+
+		if newPart < latestPart {
+			isNewer = false
+			break
+		}
+	}
+
+	return isNewer, nil
+}
+
 func (s *StorageEntAdapter) isVersionNewer(ctx context.Context, pkg *ent.RepoPackage, newVersion fields.RequiredString) (bool, error) {
-	latest, err := s.entClient.Version.Query().Where(version.PackageIDEQ(pkg.ID)).Order(ent.Desc(version.FieldVersion)).First(ctx)
+	latestVersions, err := s.entClient.Version.Query().Where(version.PackageIDEQ(pkg.ID)).All(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return true, nil
@@ -41,11 +68,22 @@ func (s *StorageEntAdapter) isVersionNewer(ctx context.Context, pkg *ent.RepoPac
 		return false, err
 	}
 
-	if latest.Version >= newVersion.String() {
-		return false, nil
+	if len(latestVersions) == 0 {
+		return true, nil
 	}
 
-	return true, nil
+	latest := latestVersions[0].Version
+
+	for i := 1; i < len(latestVersions); i++ {
+		v := latestVersions[i]
+		if ok, err := isVersionNewer(latest, v.Version); err != nil {
+			return false, err
+		} else if ok {
+			latest = v.Version
+		}
+	}
+
+	return isVersionNewer(latest, newVersion.String())
 }
 
 func (s *StorageEntAdapter) createVersion(ctx context.Context, publisherID fields.EntityID, pkg *ent.RepoPackage, manifest *entities.PackageVersion) (*ent.Version, error) {

@@ -1,6 +1,7 @@
 package fields
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 )
@@ -11,6 +12,23 @@ func (w Website) String() string {
 	uri := url.URL(w)
 	u := &uri
 	return u.String()
+}
+
+func (w *Website) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	website, err := WebsiteFromString(s)
+	if err != nil {
+		return err
+	}
+	*w = website
+	return nil
+}
+
+func (w Website) MarshalJSON() ([]byte, error) {
+	return json.Marshal(w.String())
 }
 
 // converters

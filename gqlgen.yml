@@ -1,0 +1,87 @@
+# schema tells gqlgen when the GraphQL schema is located.
+schema:
+  - graph/types.graphql
+  - graph/noxite.graphql
+  - graph/ent.graphql
+
+# Where should the generated server code go?
+exec:
+  layout: follow-schema
+  dir: graph
+  package: graph
+
+# Enable Apollo federation support
+federation:
+  filename: graph/federation.go
+  package: graph
+
+# Where should any generated models go?
+model:
+  filename: graph/models_gen.go
+  package: graph
+
+# Where should the resolver implementations go?
+resolver:
+  layout: follow-schema
+  dir: graph/resolvers
+  package: resolvers
+  filename_template: "{name}.resolvers.go"
+
+
+# gqlgen will search for any type names in the schema in the generated
+# ent package. If they match it will use them, otherwise it will new ones.
+autobind:
+  - github.com/mrparano1d/noxite/ent
+
+skip_validation: true
+skip_mod_tidy: true
+
+# This section declares type mapping between the GraphQL and Go type systems.
+models:
+  ID: # Defines the ID field as Go 'int'.
+    model:
+      - github.com/99designs/gqlgen/graphql.IntID
+  Node:
+    model:
+      - github.com/mrparano1d/noxite/ent.Noder
+  Cursor:
+    model:
+      - github.com/mrparano1d/noxite/ent.Cursor
+  Bytes:
+    model:
+      - github.com/mrparano1d/noxite/graph.Bytes
+  Permissions:
+    model:
+      - github.com/mrparano1d/noxite/graph.Permissions
+  Bugs:
+    model:
+      - github.com/mrparano1d/noxite/graph.Bugs
+  MixedAuthor:
+    model:
+      - github.com/mrparano1d/noxite/graph.MixedAuthor
+  MixedAuthors:
+    model:
+      - github.com/mrparano1d/noxite/graph.MixedAuthors
+  UrlType:
+    model:
+      - github.com/mrparano1d/noxite/graph.UrlType
+  Directories:
+    model:
+      - github.com/mrparano1d/noxite/graph.Directories
+  Repository:
+    model:
+      - github.com/mrparano1d/noxite/graph.Repository
+  RequiredMap:
+    model:
+      - github.com/mrparano1d/noxite/graph.RequiredMap
+  RequiredKeyMap:
+    model:
+      - github.com/mrparano1d/noxite/graph.RequiredKeyMap
+  RequiredMapRequiredKeyMap:
+    model:
+      - github.com/mrparano1d/noxite/graph.RequiredMapRequiredKeyMap
+  RequiredList:
+    model:
+      - github.com/mrparano1d/noxite/graph.RequiredList
+
+  

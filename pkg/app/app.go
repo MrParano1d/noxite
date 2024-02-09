@@ -75,6 +75,10 @@ func ServeApp() error {
 		handler.PackageHandler(r, app)
 	})
 
+	r.Group(func(r chi.Router) {
+		handler.GQLHandler(r, app, entClient)
+	})
+
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "not found", http.StatusNotFound)
 	})

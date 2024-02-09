@@ -1,23 +1,167 @@
 package fields
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 )
 
 type ForeignAuthor struct {
-	Name    RequiredString
-	Email   *Email
-	Website *Website
+	Name    RequiredString `json:"name"`
+	Email   *Email         `json:"email,omitempty"`
+	Website *Website       `json:"website,omitempty"`
 }
 
 type MixedAuthor Author[any]
+
+func (a MixedAuthor) MarshalJSON() ([]byte, error) {
+	switch v := a.value.(type) {
+	case Author[ForeignAuthor]:
+		return json.Marshal(v)
+	case ForeignAuthor:
+		return json.Marshal(v)
+	case EntityID:
+		return json.Marshal(v)
+	default:
+		return nil, fmt.Errorf("invalid marshal MixedAuthor type")
+	}
+}
+
+func (a *MixedAuthor) UnmarshalJSON(data []byte) error {
+	var v any
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	switch v := v.(type) {
+	case map[string]any:
+
+		if len(v) == 0 {
+			*a = MixedAuthor{}
+			return nil
+		}
+
+		builder := ForeignAuthorBuilder()
+
+		name, ok := v["name"].(string)
+		if ok {
+			builder.Name(name)
+		}
+
+		email, ok := v["email"].(string)
+		if ok {
+			builder.Email(email)
+		}
+
+		website, ok := v["website"].(string)
+		if ok {
+			builder.Website(website)
+		}
+
+		author, err := builder.Build()
+		if err != nil {
+			return fmt.Errorf("invalid author from json: %v", err)
+		}
+
+		a.value = author
+	case string:
+		author, err := EntityIDFromString(v)
+		if err != nil {
+			return err
+		}
+		a.value = author
+	case float64:
+		author, err := EntityIDFromInt(int(v))
+		if err != nil {
+			return err
+		}
+		a.value = author
+	default:
+		return fmt.Errorf("invalid unmarshal MixedAuthor type: %T", v)
+	}
+
+	return nil
+}
+
 type MixedAuthors []MixedAuthor
+
+func (a MixedAuthors) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	buf.WriteString("[")
+	for i, author := range a {
+		if i > 0 {
+			buf.WriteString(",")
+		}
+		authorJSON, err := json.Marshal(author)
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(authorJSON)
+	}
+	buf.WriteString("]")
+	return buf.Bytes(), nil
+}
+
 type Authors []Author[EntityID]
 type ForeignAuthors []Author[ForeignAuthor]
 
 type Author[T ForeignAuthor | EntityID | any] struct {
 	value T
+}
+
+func (a Author[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a.value)
+}
+
+func (a *Author[T]) UnmarshalJSON(data []byte) error {
+	var v any
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	switch v := v.(type) {
+	case map[string]any:
+
+		if len(v) == 0 {
+			*a = Author[T]{}
+			return nil
+		}
+
+		builder := ForeignAuthorBuilder()
+
+		name, ok := v["name"].(string)
+		if ok {
+			builder.Name(name)
+		}
+
+		email, ok := v["email"].(string)
+		if ok {
+			builder.Email(email)
+		}
+
+		website, ok := v["website"].(string)
+		if ok {
+			builder.Website(website)
+		}
+
+		author, err := builder.Build()
+		if err != nil {
+			return fmt.Errorf("invalid author from json: %v", err)
+		}
+
+		a.value = any(author).(T)
+	case string:
+		author, err := EntityIDFromString(v)
+		if err != nil {
+			return err
+		}
+		a.value = any(author).(T)
+	default:
+		return fmt.Errorf("invalid unmarshal Author type: %T", v)
+	}
+
+	return nil
 }
 
 func (a Author[T]) TryForeignAuthor() (ForeignAuthor, bool) {
@@ -31,9 +175,9 @@ func (a Author[T]) TryEntityID() (EntityID, bool) {
 }
 
 func (a Author[T]) ToMixedAuthor() MixedAuthor {
-	return MixedAuthor(MixedAuthor{
+	return MixedAuthor{
 		value: any(a.value),
-	})
+	}
 }
 
 func (a Author[T]) Value() T {

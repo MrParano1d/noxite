@@ -1,6 +1,7 @@
 package fields
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -26,6 +27,63 @@ func (u UrlType) String() string {
 	}
 
 	return buf.String()
+}
+
+func (u UrlType) MarshalJSON() ([]byte, error) {
+	if u.URL == nil && u.Type == nil {
+		return []byte("null"), nil
+	}
+
+	var buf strings.Builder
+
+	buf.WriteRune('{')
+
+	if u.URL != nil {
+		buf.WriteString(fmt.Sprintf(`"url":"%s"`, u.URL.String()))
+	}
+
+	if u.Type != nil {
+		if u.URL != nil {
+			buf.WriteRune(',')
+		}
+		buf.WriteString(fmt.Sprintf(`"type":"%s"`, u.Type.String()))
+	}
+
+	buf.WriteRune('}')
+
+	return []byte(buf.String()), nil
+}
+
+func (u *UrlType) UnmarshalJSON(data []byte) error {
+	var v map[string]interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	if len(v) == 0 {
+		*u = UrlType{}
+		return nil
+	}
+
+	builder := UrlTypeBuilder()
+
+	url, ok := v["url"].(string)
+	if ok {
+		builder.URL(url)
+	}
+
+	typ, ok := v["type"].(string)
+	if ok {
+		builder.Type(typ)
+	}
+
+	urlType, err := builder.Build()
+	if err != nil {
+		return err
+	}
+
+	*u = urlType
+	return nil
 }
 
 // converters
