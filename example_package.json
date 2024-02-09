@@ -68,5 +68,8 @@
   "publishConfig": {
     "registry": "http://localhost:3000"
   },
-  "bundleDependencies": []
+  "bundleDependencies": [],
+  "dependencies": {
+    "@noxite/package-example": "^1.0.9"
+  }
 }
