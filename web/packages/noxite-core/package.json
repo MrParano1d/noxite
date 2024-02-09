@@ -1,0 +1,39 @@
+{
+  "name": "noxite-core",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/noxite-core.umd.cjs",
+  "module": "./dist/noxite-core.js",
+  "exports": {
+    ".": {
+      "import": "./dist/noxite-core.js",
+      "require": "./dist/noxite-core.umd.cjs"
+    }
+  },
+  "types": "dist/noxite.d.ts",
+  "scripts": {
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "coverage": "vitest run --coverage",
+    "coverage:watch": "vitest watch --coverage"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "@vitest/coverage-istanbul": "^1.2.2",
+    "jsdom": "^24.0.0",
+    "typescript": "^5.2.2",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "vite": "^5.1.0",
+    "vite-plugin-dts": "^3.7.2",
+    "vitest": "^1.2.2"
+  },
+  "dependencies": {
+    "@easy/core-essentials": "^1.5.0"
+  }
+}
