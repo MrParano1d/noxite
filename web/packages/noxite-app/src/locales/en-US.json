@@ -1,1 +1,9 @@
-{}
+{
+  "login": {
+    "title": "Login",
+    "email": "Email",
+    "password": "Password",
+    "forgot-password": "Forgot password?",
+    "login-action": "Log in"
+  }
+}
