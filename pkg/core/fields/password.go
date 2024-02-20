@@ -20,24 +20,30 @@ func (p Password) Compare(other Password) bool {
 // PasswordFromString validates the given string and returns a Password.
 // If the string is invalid, an error is returned.
 func PasswordFromString(s string) (Password, error) {
+
 	if len(s) < 8 {
 		return Password(s), &PasswordTooShortError{}
 	}
 
 	var (
-		hasUpper bool
-		hasLower bool
-		hasNum   bool
+		hasUpper       bool
+		hasLower       bool
+		hasNum         bool
+		hasSpecialChar bool
 	)
 
 	for _, c := range s {
 		switch {
+		case c == ' ':
+			return Password(s), &PasswordInvalidCharacter{}
 		case c >= 'A' && c <= 'Z':
 			hasUpper = true
 		case c >= 'a' && c <= 'z':
 			hasLower = true
 		case c >= '0' && c <= '9':
 			hasNum = true
+		case c == '!' || c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '&' || c == '*' || c == '(' || c == ')' || c == '-' || c == '+' || c == '=' || c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ';' || c == '<' || c == '>' || c == ',' || c == '.' || c == '?' || c == '/' || c == '|' || c == '\\' || c == '`' || c == '~':
+			hasSpecialChar = true
 		}
 	}
 
@@ -51,6 +57,10 @@ func PasswordFromString(s string) (Password, error) {
 
 	if !hasNum {
 		return Password(s), &PasswordNoNumberError{}
+	}
+
+	if !hasSpecialChar {
+		return Password(s), &PasswordNoSpecialCharError{}
 	}
 
 	return Password(s), nil
@@ -92,4 +102,20 @@ type PasswordNoNumberError struct {
 
 func (e PasswordNoNumberError) Error() string {
 	return "Password does not contain a number."
+}
+
+// PasswordNoSpecialCharError is returned when the password does not contain a special character.
+type PasswordNoSpecialCharError struct {
+}
+
+func (e PasswordNoSpecialCharError) Error() string {
+	return "Password does not contain a special character."
+}
+
+// PasswordInvalidCharacter is returned when the password contains an invalid character.
+type PasswordInvalidCharacter struct {
+}
+
+func (e PasswordInvalidCharacter) Error() string {
+	return "Password contains an invalid character."
 }

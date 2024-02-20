@@ -14,3 +14,10 @@ scalar UrlType
 scalar RequiredString
 scalar Directories
 scalar Repository
+
+directive @auth(requires: AuthRole!) on FIELD_DEFINITION | OBJECT
+
+enum AuthRole {
+  RESTRICTED
+  PUBLIC
+}

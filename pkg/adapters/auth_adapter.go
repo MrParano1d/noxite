@@ -42,3 +42,24 @@ func (a *AuthAdapter) Login(ctx context.Context, username fields.Username, passw
 
 	return UserFromEntUser(user)
 }
+
+func (a *AuthAdapter) LoginByEmail(ctx context.Context, email fields.Email, password fields.Password) (*entities.User, error) {
+	user, err := a.entClient.User.Query().
+		WithRole().
+		Where(user.DeletedAtIsNil()).
+		Where(user.Email(email.String())).
+		Where(user.Password(password.Bytes())).
+		Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, &ports.AuthAdapterUserNotFoundError{
+				Username: fields.Username(email.String()),
+			}
+		}
+		return nil, &ports.AuthAdapterLoginFailedError{
+			Err: err,
+		}
+	}
+
+	return UserFromEntUser(user)
+}

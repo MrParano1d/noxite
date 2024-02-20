@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/mrparano1d/noxite/pkg/core/fields"
+	"github.com/mrparano1d/noxite/pkg/graphql"
 )
 
 type Version struct {
@@ -18,7 +19,7 @@ type Version struct {
 // Annotations of the Role.
 func (Version) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entgql.QueryField(),
+		entgql.QueryField().Directives(graphql.AuthDirective(graphql.RoleRestricted)),
 		entgql.MultiOrder(),
 		entgql.RelayConnection(),
 	}

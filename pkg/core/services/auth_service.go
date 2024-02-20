@@ -27,11 +27,21 @@ func NewAuthService(
 
 // usecases
 
-func (s *AuthService) Login(ctx context.Context, username string, email string, password string) (*entities.Session, error) {
+func (s *AuthService) Login(ctx context.Context, usernameOrEmail string, password string) (*entities.Session, error) {
 
-	name, err := fields.UsernameFromString(username)
+	var err error
+	var userEmail *fields.Email
+	var userName *fields.Username
+
+	possibleEmail, err := fields.EmailFromString(usernameOrEmail)
 	if err != nil {
-		return nil, handleErrors(err)
+		name, err := fields.UsernameFromString(usernameOrEmail)
+		if err != nil {
+			return nil, handleErrors(err)
+		}
+		userName = &name
+	} else {
+		userEmail = &possibleEmail
 	}
 
 	pw, err := fields.PasswordFromString(password)
@@ -39,9 +49,20 @@ func (s *AuthService) Login(ctx context.Context, username string, email string, 
 		return nil, handleErrors(err)
 	}
 
-	user, err := s.adapter.Login(ctx, name, pw)
-	if err != nil {
-		return nil, handleErrors(err)
+	var user *entities.User
+
+	if userName != nil {
+		user, err = s.adapter.Login(ctx, *userName, pw)
+		if err != nil {
+			return nil, handleErrors(err)
+		}
+	}
+
+	if userEmail != nil {
+		user, err = s.adapter.LoginByEmail(ctx, *userEmail, pw)
+		if err != nil {
+			return nil, handleErrors(err)
+		}
 	}
 
 	sess, err := s.sessionService.CreateSessionForUser(ctx, user)

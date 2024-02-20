@@ -30,7 +30,7 @@ func AuthHandler(r chi.Router, app *core.ApplicationCore) {
 			return
 		}
 
-		session, err := app.AuthService().Login(r.Context(), loginReq.Name, loginReq.Email, loginReq.Password)
+		session, err := app.AuthService().Login(r.Context(), loginReq.Name, loginReq.Password)
 		if err != nil {
 			// TODO replace log with proper logging
 			log.Println("login failed", err)

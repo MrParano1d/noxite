@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/mrparano1d/noxite/pkg/graphql"
 )
 
 type RepoPackage struct {
@@ -17,7 +18,7 @@ type RepoPackage struct {
 // Annotations of the RepoPackage.
 func (RepoPackage) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entgql.QueryField(),
+		entgql.QueryField().Directives(graphql.AuthDirective(graphql.RoleRestricted)),
 		entgql.RelayConnection(),
 		entgql.MultiOrder(),
 	}

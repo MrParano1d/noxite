@@ -12,6 +12,7 @@ import (
 	"github.com/mrparano1d/noxite/pkg/app/auth"
 	"github.com/mrparano1d/noxite/pkg/app/handler"
 	"github.com/mrparano1d/noxite/pkg/core"
+	"github.com/mrparano1d/noxite/pkg/graphql"
 	"github.com/redis/go-redis/v9"
 
 	"log"
@@ -76,6 +77,7 @@ func ServeApp() error {
 	})
 
 	r.Group(func(r chi.Router) {
+		r.Use(graphql.TokenMiddleware)
 		handler.GQLHandler(r, app, entClient)
 	})
 

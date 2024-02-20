@@ -3,4 +3,6 @@
 !resolvers/*
 !.gitignore
 !types_*.go
+!directive_*.go
 !types.graphql
+!noxite.graphql

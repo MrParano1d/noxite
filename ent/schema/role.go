@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/mrparano1d/noxite/pkg/core/entities"
+	"github.com/mrparano1d/noxite/pkg/graphql"
 )
 
 // Role holds the schema definition for the Role entity.
@@ -19,7 +20,7 @@ type Role struct {
 // Annotations of the Role.
 func (Role) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entgql.QueryField(),
+		entgql.QueryField().Directives(graphql.AuthDirective(graphql.RoleRestricted)),
 		entgql.Mutations(entgql.MutationCreate(), entgql.MutationUpdate()),
 		entgql.MultiOrder(),
 		entgql.RelayConnection(),

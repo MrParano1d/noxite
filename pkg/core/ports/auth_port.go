@@ -10,6 +10,7 @@ import (
 
 type AuthPort interface {
 	Login(ctx context.Context, username fields.Username, password fields.Password) (*entities.User, error)
+	LoginByEmail(ctx context.Context, email fields.Email, password fields.Password) (*entities.User, error)
 }
 
 // errors

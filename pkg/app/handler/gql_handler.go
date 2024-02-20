@@ -10,7 +10,7 @@ import (
 )
 
 func GQLHandler(r chi.Router, app *core.ApplicationCore, client *ent.Client) {
-	srv := handler.NewDefaultServer(resolvers.NewSchema(client))
+	srv := handler.NewDefaultServer(resolvers.NewSchema(client, app))
 	r.Handle("/graphql/query", srv)
 	r.Handle("/graphql", playground.Handler("Noxite Playground", "/graphql/query"))
 }

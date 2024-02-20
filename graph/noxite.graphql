@@ -1,0 +1,9 @@
+type AuthPayload {
+  token: String!
+  expires_at: Time!
+}
+
+type Mutation {
+  login(usernameOrEmail: String!, password: String!): AuthPayload!
+    @auth(requires: PUBLIC)
+}

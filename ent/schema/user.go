@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/mrparano1d/noxite/pkg/graphql"
 )
 
 // User holds the schema definition for the User entity.
@@ -18,7 +19,7 @@ type User struct {
 // Annotations of the RepoPackage.
 func (User) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entgql.QueryField(),
+		entgql.QueryField().Directives(graphql.AuthDirective(graphql.RoleRestricted)),
 		entgql.Mutations(entgql.MutationCreate(), entgql.MutationUpdate()),
 		entgql.MultiOrder(),
 		entgql.RelayConnection(),
